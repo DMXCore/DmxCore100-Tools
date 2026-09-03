@@ -25,5 +25,11 @@ the next boot the bootloader verifies the hash, flashes itself and deletes the f
 afterwards with `vcgencmd bootloader_version` (inside the app container) or read
 `/proc/device-tree/chosen/bootloader/build-timestamp` on the host.
 
+**Timestamp rule (verified on damp-feather 2026-09-03):** the bootloader records the `ts:` value
+from `pieeprom.sig` as its update-time and ignores any staged image whose `ts:` is not newer than
+that. It also leaves the files in `/mnt/boot` after flashing. So whenever `pieeprom.upd` is
+rebuilt, regenerate `pieeprom.sig` with a fresh timestamp, and a device that was flashed by
+other means (rpiboot) needs a `.sig` newer than that flash.
+
 To rebuild for a newer release: `rpi-eeprom-config --config boot.conf --out pieeprom.upd
 pieeprom-<date>.bin`, then `rpi-eeprom-digest -i pieeprom.upd -o pieeprom.sig`.
