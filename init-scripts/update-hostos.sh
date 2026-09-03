@@ -8,18 +8,20 @@ fi
 
 # Function to display usage information
 show_help() {
-  echo "Usage: $(basename "$0") [-h] [-v VERSION]"
+  echo "Usage: $(basename "$0") [-h] [-v VERSION] [-e]"
   echo
   echo "Options:"
   echo "  -h          Display this help message and exit."
   echo "  -v VERSION  Force base board version (v1 or v2). If not provided, version is detected automatically."
+  echo "  -e          CM5 only: stage the bootloader EEPROM update in /mnt/boot (applied by the bootloader on the next reboot)."
   echo
   exit 0
 }
 
 # Parse command-line options
 FORCED_VERSION=""
-while getopts ":hv:" opt; do
+STAGE_EEPROM=0
+while getopts ":hv:e" opt; do
   case "$opt" in
     h)
       show_help
@@ -31,6 +33,9 @@ while getopts ":hv:" opt; do
         echo "Error: Invalid version '$FORCED_VERSION'. Must be 'v1' or 'v2'."
         exit 1
       fi
+      ;;
+    e)
+      STAGE_EEPROM=1
       ;;
     \?)
       echo "Error: Invalid option: -$OPTARG"
@@ -200,6 +205,46 @@ if curl -s -L --fail "$DOWNLOAD_URL" -o "$DEST_FILE"; then
 else
   echo "Failed to download dmxcore100.dtbo from $DOWNLOAD_URL"
   exit 1
+fi
+
+# CM5: check the bootloader EEPROM version and optionally stage the self-update
+# The RP1-era CM5 modules shipped with bootloader 2024-09-23, which leaves the Wi-Fi rail and
+# SDIO2 enabled on modules without Wi-Fi. Raspberry Pi recommends 2025-03-10 or newer for CM5.
+EEPROM_MIN_TS=1741564800   # 2025-03-10 00:00:00 UTC
+EEPROM_URL_BASE="https://github.com/DMXCore/DmxCore100/raw/refs/heads/main/eeprom/cm5"
+if [ "$COMPUTE_MODULE" = "CM5" ]; then
+  BL_DIR="/proc/device-tree/chosen/bootloader"
+  if [ -f "$BL_DIR/build-timestamp" ]; then
+    # big-endian u32
+    BL_TS=$(od -An -tu1 -N4 "$BL_DIR/build-timestamp" | awk '{print $1*16777216 + $2*65536 + $3*256 + $4}')
+    BL_VER=$(tr -d '\0' < "$BL_DIR/version" 2>/dev/null | cut -c1-12)
+    BL_DATE=$(date -u -d "@$BL_TS" +%Y-%m-%d 2>/dev/null || echo "ts=$BL_TS")
+    echo "CM5 bootloader EEPROM: $BL_DATE ($BL_VER)"
+    if [ "$BL_TS" -lt "$EEPROM_MIN_TS" ]; then
+      echo "*WARNING*: bootloader $BL_DATE is older than the 2025-03-10 minimum Raspberry Pi recommends for CM5."
+      echo "           CM5 units on the 2024-09-23 bootloader have shown spontaneous power-offs. Re-run with -e to stage the update."
+    fi
+  else
+    echo "*WARNING*: cannot read $BL_DIR/build-timestamp; bootloader version unknown."
+  fi
+
+  if [ "$STAGE_EEPROM" = "1" ]; then
+    echo "Staging CM5 bootloader EEPROM update in /mnt/boot..."
+    download_file "$EEPROM_URL_BASE/pieeprom.upd" /tmp/pieeprom.upd
+    download_file "$EEPROM_URL_BASE/pieeprom.sig" /tmp/pieeprom.sig
+    EXPECTED_SHA=$(head -1 /tmp/pieeprom.sig | tr -d '\r\n')
+    ACTUAL_SHA=$(sha256sum /tmp/pieeprom.upd | awk '{print $1}')
+    UPD_SIZE=$(wc -c < /tmp/pieeprom.upd)
+    if [ "$EXPECTED_SHA" != "$ACTUAL_SHA" ] || [ "$UPD_SIZE" -ne 2097152 ]; then
+      echo "Error: downloaded pieeprom.upd does not match pieeprom.sig (sha $ACTUAL_SHA, size $UPD_SIZE). Not staging."
+      rm -f /tmp/pieeprom.upd /tmp/pieeprom.sig
+      exit 1
+    fi
+    cp /tmp/pieeprom.upd /mnt/boot/pieeprom.upd && cp /tmp/pieeprom.sig /mnt/boot/pieeprom.sig && sync
+    rm -f /tmp/pieeprom.upd /tmp/pieeprom.sig
+    echo "Staged pieeprom.upd (sha256 $ACTUAL_SHA). The bootloader will flash it on the next reboot and remove the files."
+    echo "Verify afterwards: /proc/device-tree/chosen/bootloader/build-timestamp on the host, or 'vcgencmd bootloader_version' in the app container."
+  fi
 fi
 
 # Download boot image from API to /tmp and copy to splash directories
