@@ -240,9 +240,12 @@ if [ "$COMPUTE_MODULE" = "CM5" ]; then
       rm -f /tmp/pieeprom.upd /tmp/pieeprom.sig
       exit 1
     fi
+    # The bootloader does not remove the files after flashing; it skips them again once its
+    # recorded update-time matches the .sig timestamp. Replace any stale copy.
+    rm -f /mnt/boot/pieeprom.upd /mnt/boot/pieeprom.sig /mnt/boot/pieeprom.bin
     cp /tmp/pieeprom.upd /mnt/boot/pieeprom.upd && cp /tmp/pieeprom.sig /mnt/boot/pieeprom.sig && sync
     rm -f /tmp/pieeprom.upd /tmp/pieeprom.sig
-    echo "Staged pieeprom.upd (sha256 $ACTUAL_SHA). The bootloader will flash it on the next reboot and remove the files."
+    echo "Staged pieeprom.upd (sha256 $ACTUAL_SHA). The bootloader flashes it on the next reboot; the files stay in /mnt/boot and are ignored afterwards."
     echo "Verify afterwards: /proc/device-tree/chosen/bootloader/build-timestamp on the host, or 'vcgencmd bootloader_version' in the app container."
   fi
 fi
