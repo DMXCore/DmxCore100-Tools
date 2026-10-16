@@ -18,6 +18,8 @@ in the buttons' messages to match your own cues and presets.
 
 Buttons can send their value (1 on press, 0 on release) or nothing: every built-in trigger
 address fires on a non-zero argument and ignores the 0. A preset's fade time has its own
-address, `/dmxcore/preset/<code>/fade <ms>`, so a button value is never read as one.
+address, `/dmxcore/preset/<code>/fade <ms>`, so a button value is never read as one. A fader on
+`/dmxcore/fadetime` (0 to 5000, say) sets the fade time for this panel's preset buttons without
+changing the device default.
 
 Reference: https://docs.dmxcore.com/dmx-core-100/integrations/osc-open-sound-control/
