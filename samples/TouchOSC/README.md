@@ -16,8 +16,8 @@ send port 8000, receive port 9000, and register the device under Control & Integ
 OSC Clients with feedback port 9000 and "Send device status updates" on. Change the codes
 in the buttons' messages to match your own cues and presets.
 
-Preset buttons send the address with no argument on purpose: on a preset address a numeric
-argument is the fade time in milliseconds, and a TouchOSC button sends its value (1, then 0 on
-release).
+Buttons can send their value (1 on press, 0 on release) or nothing: every built-in trigger
+address fires on a non-zero argument and ignores the 0. A preset's fade time has its own
+address, `/dmxcore/preset/<code>/fade <ms>`, so a button value is never read as one.
 
 Reference: https://docs.dmxcore.com/dmx-core-100/integrations/osc-open-sound-control/
