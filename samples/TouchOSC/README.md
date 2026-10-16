@@ -6,9 +6,7 @@ a phone-sized panel (640 x 860) for the DMX Core 100 with
 - four look buttons: two cues (`/dmxcore/cue/CUE2`, `/dmxcore/cue/CUE4`) and two presets
   (`/dmxcore/preset/PRESET2`, `/dmxcore/preset/DANCE`), plus All Off (`/dmxcore/preset/ALL_OFF`)
   and Stop (`/dmxcore/cuecontrol/stop`);
-- a master fader on `/dmxcore/dimmer/master` (sends and receives) and a fade-time fader on
-  `/dmxcore/fadetime` scaled 0 to 5000 ms: it sets how long this panel's presets take to fade,
-  like a time fader on a console, without touching the device default or other panels;
+- a master fader on `/dmxcore/dimmer/master` (sends and receives);
 - a Storm button on `/grandhall/storm`, an example of your own address for an input trigger;
 - live feedback: every button listens on `/dmxcore/active/<cue|preset|timeline>/<code>` and
   lights while that item plays, and the status line shows `/dmxcore/status/text`.
@@ -20,7 +18,8 @@ in the buttons' messages to match your own cues and presets.
 
 The buttons send their value as TouchOSC does by default, 1 on press and 0 on release; the
 unit reads a trigger address that way (any non-zero number is a press, 0 is ignored), so
-nothing needs changing on the button. A preset button fades over the device default or the
-panel's fade-time fader; for one button with its own time use `/dmxcore/preset/<code>/fade <ms>`.
+nothing needs changing on the button. A preset button fades over the device default; for one button with its
+own time use `/dmxcore/preset/<code>/fade <ms>`, and a fader on `/dmxcore/fadetime` (0 to 5000 ms)
+would set the fade time for everything this panel sends, like a time fader on a console.
 
 Reference: https://docs.dmxcore.com/dmx-core-100/integrations/osc-open-sound-control/
