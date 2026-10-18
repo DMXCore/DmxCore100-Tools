@@ -26,4 +26,9 @@ other way, `/dmxcore/preset/<code>/fade <ms>` with the time as the value, which 
 button alone. A fader on `/dmxcore/fadetime` (0 to 5000 ms) would instead set the time for
 everything this panel sends, like a time fader on a console.
 
+The layout carries one small document script: when it loads it sends `/dmxcore/hello`, so the
+unit replies with its full state and every button and fader starts out right, and it sends
+`/ping` every ten seconds so a phone that comes back from sleep gets the state again. The
+buttons and faders themselves are plain messages; nothing else in the file is scripted.
+
 Reference: https://docs.dmxcore.com/dmx-core-100/integrations/osc-open-sound-control/
