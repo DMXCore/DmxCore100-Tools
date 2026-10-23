@@ -9,8 +9,13 @@ a phone-sized panel (640 x 860) for the DMX Core 100 with
   (`/dmxcore/preset/ALL_OFF`) and Stop (`/dmxcore/cuecontrol/stop`);
 - a master fader on `/dmxcore/dimmer/master` (sends and receives);
 - a Storm button on `/grandhall/storm`, an example of your own address for an input trigger;
-- live feedback: every button listens on `/dmxcore/active/<cue|preset|timeline>/<code>` and
-  lights while that item plays, and the status line shows `/dmxcore/status/text`.
+- live feedback: the unit sends an item's state on its trigger address, with the code as stored
+  (`/dmxcore/preset/BAR_RED 1` while Bar Red is applied, `0` when it is not), so a plain button
+  is one message with Send and Receive both ticked and lights while its item plays. Bar Blue and
+  Storm send on other addresses (`/fade 4000`, your own `/grandhall/storm`), so each has a second,
+  receive-only message on its item's address (`/dmxcore/preset/BAR_BLUE`, and
+  `/dmxcore/timeline/<code>` for the timeline the Storm trigger plays). The status line shows
+  `/dmxcore/status/text`.
 
 Open it in TouchOSC and set the OSC connection: host is the unit (Browse finds it by name),
 or `127.0.0.1` when TouchOSC runs on the same computer as the DMX Core desktop software; send
