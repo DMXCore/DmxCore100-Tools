@@ -19,7 +19,7 @@ with your own: one row per fixture, a name, a slot and start channel, and the fi
 | Start Ch | 1-512. `2.101` style (slot.channel) also works when there is no Slot ID |
 | Copies | 1-680 |
 | Personality | Empty uses the profile's first personality |
-| Zone | Must already exist on the unit |
+| Zone Name | Matched ignoring case and extra spaces. A zone the unit does not have yet is an error, unless **Create missing zones** is on in the import dialog |
 | Manufacturer, Profile | Matched to the profiles on the unit; anything not exact gets a suggestion in the import dialog |
 | Profile Code | Optional exact profile, as written by the export |
 | Template | Optional code of a patched fixture: the row gets its profile, personality, hidden functions and custom options |

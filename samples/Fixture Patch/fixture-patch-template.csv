@@ -1,4 +1,4 @@
-﻿Code,Name,Enabled,Slot ID,Start Ch,Copies,Personality,Zone,Manufacturer,Profile,Profile Code,Template,Copy Trims,Hidden Functions,Custom Options
+﻿Code,Name,Enabled,Slot ID,Start Ch,Copies,Personality,Zone Name,Manufacturer,Profile,Profile Code,Template,Copy Trims,Hidden Functions,Custom Options
 ,Front wash 1,Yes,1,1,1,,,Generic,PAR Wash (RGB),,,,,
 ,Front wash 2,Yes,1,4,1,,,Generic,PAR Wash (RGB),,,,,
 ,Back wash,Yes,1,7,2,,,Generic,PAR Wash (RGBW),,,100% 80%,,
