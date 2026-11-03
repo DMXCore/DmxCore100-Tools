@@ -150,31 +150,10 @@ fi
 
 echo "Base board version: $BASE_BOARD"
 
-# Append video configuration to cmdline.txt
-CMDLINE_FILE="/mnt/boot/cmdline.txt"
-VIDEO_CONFIG="video=HDMI-A-1:800x480M-32@60D"
-
-# Verify cmdline.txt exists and is writable
-if [ ! -f "$CMDLINE_FILE" ]; then
-  echo "Error: $CMDLINE_FILE not found or not mounted"
-  exit 1
-fi
-
-# Read the first (and only) line of cmdline.txt
-CMDLINE_CONTENT=$(head -n 1 "$CMDLINE_FILE")
-
-if echo "$CMDLINE_CONTENT" | grep -q "$VIDEO_CONFIG"; then
-  echo "Video configuration already exists in $CMDLINE_FILE"
-else
-  # Append video config to the first line and overwrite the file
-  echo -n "${CMDLINE_CONTENT} $VIDEO_CONFIG" > "$CMDLINE_FILE"
-  if [ $? -eq 0 ]; then
-    echo "Appended video configuration to $CMDLINE_FILE"
-  else
-    echo "Error appending video configuration to $CMDLINE_FILE"
-    exit 1
-  fi
-fi
+# The 800x480 touchscreen mode (video=HDMI-A-1:800x480M-32@60D) is carried by the
+# dmxcore100 overlay below as /chosen/bootargs, which the firmware merges into the
+# kernel command line. cmdline.txt is not touched: balenaOS host OS updates overwrite
+# it, while files in overlays/ survive them.
 
 # Download dmxcore100.dtbo and overwrite existing file
 OVERLAY_DIR="/mnt/boot/overlays"
